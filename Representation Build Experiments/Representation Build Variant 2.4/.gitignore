@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+results/
+training_log.txt

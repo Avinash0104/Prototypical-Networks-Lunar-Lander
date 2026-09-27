@@ -1,0 +1,160 @@
+import os
+import copy
+import torch
+import torch.nn.functional as F
+import numpy as np
+
+from models.encoder import Encoder
+from experiment.environment import Environment, FRAME_STACK, FRAME_CHANNELS
+from experiment.buffer import ReplayBuffer
+from models.prototype import prototypical_loss
+from experiment.checkpoint import save_checkpoint, load_checkpoint, find_latest_checkpoint
+
+class Agent:
+    def __init__(self, z_dim=64, lr=1e-4, device="cpu",
+                 encoder_target_tau=0.05, encoder_update_frequency=1, num_support=4):
+        self.device = device
+        self.encoder_target_tau = encoder_target_tau
+        self.encoder_update_frequency = encoder_update_frequency
+        self.num_support = num_support
+
+        in_channels = FRAME_STACK * FRAME_CHANNELS
+        self.encoder = Encoder(in_channels, z_dim).to(device)
+
+        self.encoder_target = copy.deepcopy(self.encoder).to(device)
+        for p in self.encoder_target.parameters():
+            p.requires_grad = False
+
+        self.proto_optimizer = torch.optim.Adam(self.encoder.parameters(), lr=lr)
+
+    def soft_update_target_encoder(self):
+        for target_param, param in zip(self.encoder_target.parameters(), self.encoder.parameters()):
+            target_param.data.copy_(self.encoder_target_tau * param.data + (1 - self.encoder_target_tau) * target_param.data)
+
+    def random_shift(self, obs, pad=4):
+        b, c, h, w = obs.shape
+        padded = F.pad(obs, (pad, pad, pad, pad), mode="replicate")
+
+        shifted = torch.empty_like(obs)
+        shift_x = torch.randint(0, 2 * pad + 1, (b,))
+        shift_y = torch.randint(0, 2 * pad + 1, (b,))
+
+        for i in range(b):
+            shifted[i] = padded[i, :, shift_y[i]:shift_y[i] + h, shift_x[i]:shift_x[i] + w]
+        return shifted
+
+    def update_proto_rep(self, obs, next_obs):
+        B, K = obs.shape[0], self.num_support
+
+        support_in = self.random_shift(obs.repeat_interleave(K, dim=0))
+        z_support = self.encoder(support_in)
+        support_y = torch.arange(B, device=self.device).repeat_interleave(K)
+
+        query_in = self.random_shift(next_obs)
+        with torch.no_grad():
+            z_query = self.encoder_target(query_in)
+        query_y = torch.arange(B, device=self.device)
+
+        loss, accuracy = prototypical_loss(z_support, support_y, z_query, query_y, num_classes=B)
+
+        self.proto_optimizer.zero_grad()
+        loss.backward()
+        self.proto_optimizer.step()
+
+        return loss, accuracy
+
+    def update(self, batch, step):
+        obs, next_obs = batch
+        obs = obs.to(self.device).float()
+        next_obs = next_obs.to(self.device).float()
+
+        loss, accuracy = None, None
+        if step % self.encoder_update_frequency == 0:
+            loss, accuracy = self.update_proto_rep(obs, next_obs)
+            self.soft_update_target_encoder()
+
+        return (loss.item(), accuracy.item()) if loss is not None else (None, None)
+
+
+def train(num_steps=100_000, warmup=1000, batch_size=32, buffer_capacity=70_000, seed=0, logstep=10_000,
+          result="results", resume=True, num_support=4, device=None, print_every=1000):
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    run_name = f"prototype_seed{seed}"
+    dir = os.path.join(result, run_name)
+    os.makedirs(dir, exist_ok=True)
+
+    env = Environment(seed=seed)
+    agent = Agent(num_support=num_support, device=device)
+    buffer = ReplayBuffer(capacity=buffer_capacity)
+
+    start_step = 0
+    episode_returns = []
+    proto_losses = []
+    proto_accuracies = []
+
+    if resume:
+        checkpoint_path, checkpoint_step = find_latest_checkpoint(dir)
+        if checkpoint_path is not None:
+            load_checkpoint(agent, checkpoint_path)
+            start_step = checkpoint_step
+            returns_path = os.path.join(dir, "episode_returns.npy")
+            if os.path.exists(returns_path):
+                episode_returns = list(np.load(returns_path))
+            losses_path = os.path.join(dir, "proto_losses.npy")
+            if os.path.exists(losses_path):
+                proto_losses = list(np.load(losses_path))
+            acc_path = os.path.join(dir, "proto_accuracies.npy")
+            if os.path.exists(acc_path):
+                proto_accuracies = list(np.load(acc_path))
+            print(f"[{run_name}] resuming from step {start_step} ({len(episode_returns)} episodes so far)", flush=True)
+
+    print(f"[{run_name}] training on device={device}", flush=True)
+
+    frame, info = env.reset(seed=seed)
+    steps_since_reset = 0
+    episode_return = 0.0
+    recent_losses, recent_accuracies = [], []
+
+    for step in range(start_step, num_steps):
+        action = env.action_space.sample()
+        next_frame, reward, terminated, truncated, info = env.step(action)
+        buffer.add(frame, steps_since_reset)
+
+        frame = next_frame
+        steps_since_reset = 0 if (terminated or truncated) else steps_since_reset + 1
+        episode_return += reward
+
+        if terminated or truncated:
+            episode_returns.append(episode_return)
+            if len(episode_returns) % 10 == 0:
+                avg_return = np.mean(episode_returns[-10:])
+                print(f"step={step}  episode={len(episode_returns)} avg_return(last10)={avg_return:.1f}")
+            episode_return = 0.0
+            frame, info = env.reset()
+            steps_since_reset = 0
+
+        if step >= warmup and buffer.size >= batch_size:
+            loss, accuracy = agent.update(buffer.sample(batch_size), step)
+            if loss is not None:
+                recent_losses.append(loss)
+                recent_accuracies.append(accuracy)
+
+        if (step + 1) % print_every == 0 and recent_losses:
+            proto_losses.append(np.mean(recent_losses))
+            proto_accuracies.append(np.mean(recent_accuracies))
+            print(f"step={step + 1}  proto_loss={proto_losses[-1]:.4f}  proto_acc={proto_accuracies[-1]:.3f}")
+            recent_losses, recent_accuracies = [], []
+
+        if (step + 1) % logstep == 0:
+            save_checkpoint(agent, os.path.join(dir, f"checkpoint_{step + 1}.pt"))
+            np.save(os.path.join(dir, "episode_returns.npy"), np.array(episode_returns))
+            np.save(os.path.join(dir, "proto_losses.npy"), np.array(proto_losses))
+            np.save(os.path.join(dir, "proto_accuracies.npy"), np.array(proto_accuracies))
+
+    return episode_returns
+
+
+if __name__ == "__main__":
+    train()

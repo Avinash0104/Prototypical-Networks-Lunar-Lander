@@ -1,0 +1,5 @@
+trained        steps_to_solve: no seed reached a 100-episode average >= 200 within 200000 steps
+random_floor   steps_to_solve: no seed reached a 100-episode average >= 200 within 200000 steps
+true_state     steps_to_solve: no seed reached a 100-episode average >= 200 within 200000 steps
+
+saved plot to results\learning_curve.png

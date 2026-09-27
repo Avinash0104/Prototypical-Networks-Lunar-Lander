@@ -1,0 +1,8 @@
+C:\Users\avina\AppData\Local\Programs\Python\Python313\Lib\site-packages\pygame\pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+trained        seed0  trained_to_step= 200000  avg_return=-225.6 +/- 119.8  success_rate=0.00
+trained        seed1  trained_to_step= 200000  avg_return=-836.2 +/- 716.0  success_rate=0.00
+trained        seed2  trained_to_step= 200000  avg_return=-816.4 +/- 215.8  success_rate=0.00
+
+trained        avg_return=-626.1+/-283.3 (seed range -836.2 to -225.6)  success_rate=0.00+/-0.00 (seed range 0.00 to 0.00)
+

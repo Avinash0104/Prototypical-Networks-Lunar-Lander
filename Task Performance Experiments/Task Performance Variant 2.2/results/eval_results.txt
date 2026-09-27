@@ -1,0 +1,15 @@
+trained        seed0  trained_to_step= 200000  avg_return=-225.6 +/- 119.8  success_rate=0.00
+trained        seed1  trained_to_step= 200000  avg_return=-836.2 +/- 716.0  success_rate=0.00
+trained        seed2  trained_to_step= 200000  avg_return=-816.4 +/- 215.8  success_rate=0.00
+random_floor   seed0  trained_to_step= 200000  avg_return=-131.5 +/- 44.0  success_rate=0.00
+random_floor   seed1  trained_to_step= 200000  avg_return=-131.5 +/- 44.0  success_rate=0.00
+random_floor   seed2  trained_to_step= 200000  avg_return=-274.9 +/- 116.8  success_rate=0.00
+true_state     seed0  trained_to_step= 200000  avg_return=-5.9 +/- 87.3  success_rate=0.02
+true_state     seed1  trained_to_step= 200000  avg_return=-52.5 +/- 24.3  success_rate=0.00
+true_state     seed2  trained_to_step= 200000  avg_return=-34.8 +/- 20.8  success_rate=0.00
+
+trained        avg_return=-626.1+/-283.3 (seed range -836.2 to -225.6)  success_rate=0.00+/-0.00 (seed range 0.00 to 0.00)
+random_floor   avg_return=-179.3+/-67.6 (seed range -274.9 to -131.5)  success_rate=0.00+/-0.00 (seed range 0.00 to 0.00)
+true_state     avg_return=-31.1+/-19.2 (seed range -52.5 to -5.9)  success_rate=0.01+/-0.01 (seed range 0.00 to 0.02)
+
+trained's worst seed (-836.2) does NOT clearly beat random_floor's best seed (-131.5) -- seed ranges overlap, so treat the average difference cautiously with only 3 seeds per arm.

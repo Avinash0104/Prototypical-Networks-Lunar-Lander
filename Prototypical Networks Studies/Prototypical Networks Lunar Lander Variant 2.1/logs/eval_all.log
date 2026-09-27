@@ -1,0 +1,62 @@
+C:\Users\avina\AppData\Local\Programs\Python\Python313\Lib\site-packages\pygame\pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+======================================================================
+1) evaluation.returns -- task performance (train vs shift returns)
+======================================================================
+baseline_seed0       train_mean=   -82.1 shift_mean=    42.5 degradation=  -124.6
+baseline_seed1       train_mean=   -70.7 shift_mean=   -37.3 degradation=   -33.4
+baseline_seed2       train_mean=  -142.7 shift_mean=   -52.6 degradation=   -90.1
+prototype_seed0      train_mean=  -177.7 shift_mean=   -27.2 degradation=  -150.5
+prototype_seed1      train_mean=   -84.7 shift_mean=   -58.0 degradation=   -26.7
+prototype_seed2      train_mean=  -236.3 shift_mean=   -83.9 degradation=  -152.4
+classifier_seed0     train_mean=  -124.5 shift_mean=    56.8 degradation=  -181.2
+classifier_seed1     train_mean=   -68.4 shift_mean=    34.2 degradation=  -102.5
+classifier_seed2     train_mean=   -90.0 shift_mean=    25.7 degradation=  -115.7
+[returns done in 32.0s]
+
+======================================================================
+2) evaluation.probe -- representation robustness (linear probe under noise shift)
+======================================================================
+baseline_seed0       probe_train_acc=0.980  probe_shift_acc=0.712  degradation=0.268
+baseline_seed1       probe_train_acc=0.995  probe_shift_acc=0.590  degradation=0.405
+baseline_seed2       probe_train_acc=0.966  probe_shift_acc=0.640  degradation=0.326
+prototype_seed0      probe_train_acc=0.969  probe_shift_acc=0.661  degradation=0.309
+prototype_seed1      probe_train_acc=0.949  probe_shift_acc=0.657  degradation=0.293
+prototype_seed2      probe_train_acc=0.961  probe_shift_acc=0.674  degradation=0.287
+classifier_seed0     probe_train_acc=0.987  probe_shift_acc=0.619  degradation=0.369
+classifier_seed1     probe_train_acc=0.973  probe_shift_acc=0.524  degradation=0.448
+classifier_seed2     probe_train_acc=0.983  probe_shift_acc=0.717  degradation=0.266
+[probe done in 29.7s]
+
+======================================================================
+3) evaluation.summary -- aggregated comparison across arms
+======================================================================
+baseline_seed0       probe_train_acc=0.980  probe_shift_acc=0.712  degradation=0.268
+baseline_seed1       probe_train_acc=0.995  probe_shift_acc=0.590  degradation=0.405
+baseline_seed2       probe_train_acc=0.966  probe_shift_acc=0.640  degradation=0.326
+prototype_seed0      probe_train_acc=0.969  probe_shift_acc=0.661  degradation=0.309
+prototype_seed1      probe_train_acc=0.949  probe_shift_acc=0.657  degradation=0.293
+prototype_seed2      probe_train_acc=0.961  probe_shift_acc=0.674  degradation=0.287
+classifier_seed0     probe_train_acc=0.987  probe_shift_acc=0.619  degradation=0.369
+classifier_seed1     probe_train_acc=0.973  probe_shift_acc=0.524  degradation=0.448
+classifier_seed2     probe_train_acc=0.983  probe_shift_acc=0.717  degradation=0.266
+Task performance (avg return over last 50 episodes, higher = better):
+  classifier      -84.8
+  baseline       -118.7
+  prototype      -120.2
+
+Representation robustness (probe accuracy drop under noise shift, lower = better):
+  prototype    0.296
+  baseline     0.333
+  classifier   0.361
+[summary done in 27.0s]
+
+======================================================================
+4) evaluation.visual -- t-SNE plots of embeddings
+======================================================================
+saved results/plots\tsne_baseline.png
+saved results/plots\tsne_prototype.png
+saved results/plots\tsne_classifier.png
+[visual done in 45.1s]
+
+ALL EVALUATIONS COMPLETE

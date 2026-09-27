@@ -1,0 +1,65 @@
+[
+  {
+    "arm": "baseline",
+    "seed": 0,
+    "train_mean": -79.43290261963529,
+    "shift_mean": -15.056251459273126,
+    "degradation": -64.37665116036216
+  },
+  {
+    "arm": "baseline",
+    "seed": 1,
+    "train_mean": -6.139230771211127,
+    "shift_mean": 92.7700112283958,
+    "degradation": -98.90924199960693
+  },
+  {
+    "arm": "baseline",
+    "seed": 2,
+    "train_mean": 17.75000736334876,
+    "shift_mean": 17.09634423606776,
+    "degradation": 0.6536631272809998
+  },
+  {
+    "arm": "prototype",
+    "seed": 0,
+    "train_mean": -90.82201917933669,
+    "shift_mean": -46.53204963934998,
+    "degradation": -44.289969539986714
+  },
+  {
+    "arm": "prototype",
+    "seed": 1,
+    "train_mean": -110.59346334204379,
+    "shift_mean": -13.035427341781359,
+    "degradation": -97.55803600026243
+  },
+  {
+    "arm": "prototype",
+    "seed": 2,
+    "train_mean": -119.28792696954649,
+    "shift_mean": -32.451669273807745,
+    "degradation": -86.83625769573874
+  },
+  {
+    "arm": "classifier",
+    "seed": 0,
+    "train_mean": -103.12773457265848,
+    "shift_mean": -42.29354147264887,
+    "degradation": -60.834193100009614
+  },
+  {
+    "arm": "classifier",
+    "seed": 1,
+    "train_mean": -75.59812457811726,
+    "shift_mean": -101.1673462993508,
+    "degradation": 25.569221721233532
+  },
+  {
+    "arm": "classifier",
+    "seed": 2,
+    "train_mean": -30.996733693458072,
+    "shift_mean": -9.6879059183628,
+    "degradation": -21.308827775095274
+  }
+]
